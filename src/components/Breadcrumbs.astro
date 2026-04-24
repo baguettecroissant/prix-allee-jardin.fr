@@ -1,0 +1,20 @@
+---
+interface Props {
+  items: { label: string; href: string }[];
+}
+const { items } = Astro.props;
+---
+
+<nav aria-label="Fil d'Ariane" class="text-sm text-gray-500 mb-4 flex flex-wrap items-center gap-1">
+  <a href="/" class="hover:text-brand-600 transition-colors">Accueil</a>
+  {items.map((item, i) => (
+    <>
+      <span class="mx-1 text-gray-400">/</span>
+      {i < items.length - 1 ? (
+        <a href={item.href} class="hover:text-brand-600 transition-colors">{item.label}</a>
+      ) : (
+        <span class="text-gray-700 font-medium">{item.label}</span>
+      )}
+    </>
+  ))}
+</nav>

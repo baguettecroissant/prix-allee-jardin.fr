@@ -1,0 +1,171 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuoteWidget from '../../components/QuoteWidget.astro';
+import { siteConfig } from '../../../site.config';
+import { blogArticles, type BlogArticle } from '../../data/blog-articles';
+
+export function getStaticPaths() {
+  return blogArticles.map(article => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props as { article: BlogArticle };
+
+const relatedArticles = blogArticles.filter(a => a.slug !== article.slug).slice(0, 3);
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": article.title,
+    "description": article.metaDescription,
+    "datePublished": article.date,
+    "dateModified": article.date,
+    "author": {
+      "@type": "Organization",
+      "name": siteConfig.name,
+      "url": `https://www.${siteConfig.domain}`,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": siteConfig.name,
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://www.${siteConfig.domain}/blog/${article.slug}`,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `https://www.${siteConfig.domain}` },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `https://www.${siteConfig.domain}/blog` },
+      { "@type": "ListItem", "position": 3, "name": article.title },
+    ]
+  }
+];
+---
+
+<BaseLayout
+  title={article.metaTitle}
+  description={article.metaDescription}
+  canonical={`/blog/${article.slug}`}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <!-- Article Hero -->
+  <section class="gradient-hero text-white py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="text-xs text-gray-400 mb-6">
+        <a href="/" class="hover:text-white transition-colors">Accueil</a>
+        <span class="mx-1">›</span>
+        <a href="/blog" class="hover:text-white transition-colors">Blog</a>
+        <span class="mx-1">›</span>
+        <span class="text-gray-300">{article.title}</span>
+      </nav>
+
+      <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm mb-4">
+        <span>{article.emoji}</span>
+        <span>{article.category}</span>
+      </div>
+
+      <h1 class="text-2xl md:text-4xl font-extrabold leading-tight mb-4">
+        {article.title}
+      </h1>
+
+      <div class="flex items-center gap-4 text-sm text-gray-300">
+        <span>📅 Mis à jour : {new Date(article.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        <span>⏱️ {article.readTime} de lecture</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Article Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid lg:grid-cols-3 gap-10">
+      <article class="lg:col-span-2">
+        <img src={article.image} alt={article.title} class="w-full rounded-2xl shadow-md mb-8 aspect-video object-cover" loading="eager" />
+
+        <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 mb-8">
+          <h2 class="text-sm font-bold text-brand-800 uppercase tracking-wide mb-2">En résumé</h2>
+          <p class="text-gray-700 text-sm leading-relaxed">{article.excerpt}</p>
+        </div>
+
+        <div class="prose prose-lg max-w-none text-gray-700
+          prose-headings:text-gray-900 prose-headings:font-bold
+          prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
+          prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
+          prose-p:mb-4 prose-p:leading-relaxed
+          prose-li:mb-1
+          prose-table:text-sm
+          prose-th:bg-gray-50 prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-600 prose-th:border-b prose-th:border-gray-200
+          prose-td:px-4 prose-td:py-3 prose-td:border-b prose-td:border-gray-100
+          prose-strong:text-gray-900
+          prose-a:text-brand-600 prose-a:no-underline hover:prose-a:underline
+        " set:html={article.content} />
+
+        <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-6 md:p-8 text-center text-white mt-10">
+          <h3 class="text-xl font-bold mb-3">
+            Prêt à passer à l'action ?
+          </h3>
+          <p class="text-brand-100 mb-5 text-sm">
+            Comparez 3 devis de paysagistes qualifiés près de chez vous. Gratuit et sans engagement.
+          </p>
+          <a href="/devis" class="inline-block bg-white text-brand-700 font-bold px-8 py-3.5 rounded-xl hover:bg-brand-50 transition-colors shadow-lg cta-btn">
+            🌳 Demander mes devis gratuits
+          </a>
+        </div>
+
+        <div class="mt-12">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">📚 Articles similaires</h3>
+          <div class="grid sm:grid-cols-3 gap-4">
+            {relatedArticles.map(ra => (
+              <a href={`/blog/${ra.slug}`} class="bg-white border border-gray-200 rounded-xl p-4 hover:border-brand-300 hover:shadow-md transition-all group">
+                <span class="text-2xl block mb-2">{ra.emoji}</span>
+                <span class="text-xs text-brand-600 font-medium">{ra.category}</span>
+                <h4 class="font-semibold text-gray-900 group-hover:text-brand-600 text-sm mt-1 line-clamp-2">{ra.title}</h4>
+                <span class="text-xs text-gray-400 mt-2 block">{ra.readTime}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </article>
+
+      <aside class="lg:col-span-1">
+        <div class="sticky top-20 space-y-6">
+          <div id="devis-form">
+            <QuoteWidget />
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h4 class="font-bold text-gray-900 mb-3 text-sm">📍 Devis par ville</h4>
+            <div class="grid grid-cols-2 gap-2">
+              {['paris', 'lyon', 'marseille', 'bordeaux', 'toulouse', 'nantes'].map(city => (
+                <a href={`/${city}`} class="text-xs text-brand-600 hover:text-brand-800 transition-colors capitalize">
+                  Allée {city}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h4 class="font-bold text-gray-900 mb-3 text-sm">📚 Nos guides</h4>
+            <ul class="space-y-2">
+              {blogArticles.map(a => (
+                <li>
+                  <a href={`/blog/${a.slug}`}
+                    class={`text-xs transition-colors block ${a.slug === article.slug ? 'text-brand-600 font-bold' : 'text-gray-600 hover:text-brand-600'}`}>
+                    {a.emoji} {a.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../../site.config';
+import { blogArticles } from '../../data/blog-articles';
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `Blog - ${siteConfig.name}`,
+    "description": "Guides, comparatifs et conseils d'experts sur les allées de jardin : prix, matériaux, pose, entretien.",
+    "url": `https://www.${siteConfig.domain}/blog`,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `https://www.${siteConfig.domain}` },
+      { "@type": "ListItem", "position": 2, "name": "Blog" },
+    ]
+  }
+];
+---
+
+<BaseLayout
+  title={`Blog Allée de Jardin — Guides & Conseils | ${siteConfig.name}`}
+  description="Guides, comparatifs et conseils d'experts sur les allées de jardin : prix 2026, matériaux, techniques de pose, entretien et réglementation."
+  canonical="/blog"
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="gradient-hero text-white py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-4">
+        📚 Guides & Conseils Allée de Jardin
+      </h1>
+      <p class="text-green-100 text-lg max-w-2xl mx-auto">
+        Tout ce que vous devez savoir avant de créer votre allée de jardin : prix, matériaux, réglementation, entretien — par des experts.
+      </p>
+    </div>
+  </section>
+
+  <!-- Articles Grid -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid md:grid-cols-2 gap-6">
+      {blogArticles.map((article, i) => (
+        <a href={`/blog/${article.slug}`}
+          class={`bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-brand-300 hover:shadow-lg transition-all group ${i === 0 ? 'md:col-span-2' : ''}`}
+        >
+          {i === 0 && (
+            <img src={article.image} alt={article.title} class="w-full h-48 md:h-64 object-cover" loading="lazy" />
+          )}
+          <div class="p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-3xl">{article.emoji}</span>
+              <div>
+                <span class="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-1 rounded-full">{article.category}</span>
+                <span class="text-xs text-gray-400 ml-2">{article.readTime}</span>
+              </div>
+            </div>
+
+            <h2 class={`font-bold text-gray-900 group-hover:text-brand-600 transition-colors mb-3 ${i === 0 ? 'text-xl md:text-2xl' : 'text-lg'}`}>
+              {article.title}
+            </h2>
+
+            <p class="text-gray-600 text-sm leading-relaxed mb-4">
+              {article.excerpt}
+            </p>
+
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-400">
+                {new Date(article.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}
+              </span>
+              <span class="text-brand-600 font-semibold text-sm group-hover:translate-x-1 transition-transform inline-block">
+                Lire l'article →
+              </span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-8 md:p-12 text-center text-white">
+      <h2 class="text-2xl font-bold mb-4">
+        Vous avez lu les guides, passez à l'action !
+      </h2>
+      <p class="text-brand-100 mb-6 max-w-lg mx-auto">
+        Comparez 3 devis de paysagistes qualifiés. Service 100% gratuit et sans engagement.
+      </p>
+      <a href="/devis" class="inline-block bg-white text-brand-700 font-bold px-8 py-4 rounded-xl hover:bg-brand-50 transition-colors shadow-lg text-lg cta-btn">
+        🌳 Demander mes 3 devis gratuits
+      </a>
+    </div>
+  </section>
+</BaseLayout>

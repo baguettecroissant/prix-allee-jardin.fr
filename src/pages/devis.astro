@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import QuoteWidget from '../components/QuoteWidget.astro';
+import { siteConfig } from '../../site.config';
+---
+
+<BaseLayout
+  title={`Devis Allée de Jardin Gratuit — Comparez 3 Paysagistes | ${siteConfig.name}`}
+  description={`Demandez votre devis allée de jardin gratuit. Comparez jusqu'à 3 propositions de paysagistes qualifiés. Sans engagement.`}
+  canonical="/devis"
+>
+  <section class="gradient-hero text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-4">
+        Demandez vos 3 Devis Allée de Jardin Gratuits
+      </h1>
+      <p class="text-green-100 text-lg max-w-xl mx-auto">
+        Remplissez le formulaire ci-dessous. Des paysagistes qualifiés de votre département vous contactent sous 48h.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-2xl mx-auto px-4 sm:px-6 py-10 -mt-4">
+    <QuoteWidget keyword={siteConfig.niche.name} />
+
+    <div class="mt-8 grid sm:grid-cols-3 gap-4 text-center">
+      <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+        <span class="text-2xl mb-2 block">🛡️</span>
+        <span class="font-semibold text-sm text-gray-900">100% Gratuit</span>
+        <p class="text-xs text-gray-500 mt-1">Aucuns frais cachés</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+        <span class="text-2xl mb-2 block">⚡</span>
+        <span class="font-semibold text-sm text-gray-900">Réponse sous 48h</span>
+        <p class="text-xs text-gray-500 mt-1">Paysagistes réactifs</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+        <span class="text-2xl mb-2 block">📋</span>
+        <span class="font-semibold text-sm text-gray-900">Sans engagement</span>
+        <p class="text-xs text-gray-500 mt-1">Comparez librement</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

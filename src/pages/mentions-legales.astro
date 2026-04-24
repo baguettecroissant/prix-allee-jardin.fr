@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../../site.config';
+---
+
+<BaseLayout
+  title={`Mentions Légales | ${siteConfig.name}`}
+  description="Mentions légales et politique de confidentialité"
+  noindex={true}
+>
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Mentions Légales</h1>
+
+    <div class="prose prose-gray max-w-none space-y-6">
+      <h2>Éditeur du site</h2>
+      <p>
+        Le site <strong>{siteConfig.domain}</strong> est édité à titre informatif.
+        Il a pour objectif de mettre en relation des particuliers avec des artisans qualifiés.
+      </p>
+
+      <h2>Hébergement</h2>
+      <p>
+        Ce site est hébergé par Cloudflare, Inc.<br/>
+        101 Townsend St, San Francisco, CA 94107, USA.
+      </p>
+
+      <h2>Service de mise en relation</h2>
+      <p>
+        Les demandes de devis sont traitées par notre partenaire <strong>ViteUnDevis.com</strong>,
+        service de mise en relation entre particuliers et professionnels du bâtiment.
+      </p>
+
+      <h2>Données personnelles</h2>
+      <p>
+        Les informations collectées via les formulaires de devis sont transmises
+        à notre partenaire ViteUnDevis.com qui les communique aux artisans partenaires
+        pouvant répondre à votre demande. Conformément au RGPD, vous disposez d'un
+        droit d'accès, de rectification et de suppression de vos données.
+      </p>
+
+      <h2>Cookies</h2>
+      <p>
+        Ce site utilise des cookies techniques nécessaires au fonctionnement du service
+        de mise en relation. Aucun cookie publicitaire n'est utilisé.
+      </p>
+
+      <h2>Responsabilité</h2>
+      <p>
+        Les prix et informations présentés sur ce site sont donnés à titre indicatif
+        et ne constituent pas un engagement contractuel. Les prix réels dépendent
+        de nombreux facteurs propres à chaque projet.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

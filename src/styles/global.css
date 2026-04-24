@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* === Custom Design Tokens — prix-allee-jardin.fr === */
+@theme {
+  --color-brand-50: #F7FEE7;
+  --color-brand-100: #ECFCCB;
+  --color-brand-200: #D9F99D;
+  --color-brand-500: #84CC16;
+  --color-brand-600: #65A30D;
+  --color-brand-700: #4D7C0F;
+  --color-brand-800: #3F6212;
+  --color-brand-900: #365314;
+
+  --color-accent-400: #FB923C;
+  --color-accent-500: #EA580C;
+  --color-accent-600: #C2410C;
+
+  --color-dark: #365314;
+}
+
+/* === Google Fonts: Raleway + Nunito === */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&family=Nunito:wght@400;500;600;700&family=Cascadia+Mono&display=swap');
+
+/* === Global Styles === */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #365314;
+  background-color: #FEFCF5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* === Monospace for data/prix === */
+.font-mono, code, .price-data {
+  font-family: 'Cascadia Mono', 'Fira Mono', monospace;
+}
+
+/* === Hero Gradient — Vert nature === */
+.gradient-hero {
+  background: linear-gradient(135deg, #365314 0%, #3F6212 40%, #4D7C0F 100%);
+}
+
+/* === ViteUnDevis Widget Overrides === */
+.vud-widget-container iframe {
+  width: 100% !important;
+  min-height: 400px;
+}
+
+.vud-widget {
+  all: initial;
+  display: block;
+  width: 100%;
+  min-height: 400px;
+  font-family: 'Nunito', sans-serif;
+}
+
+.vud-widget * {
+  all: revert;
+  box-sizing: border-box;
+}
+
+.vud-widget a {
+  color: #65A30D;
+  text-decoration: underline;
+}
+
+.vud-widget img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === Sticky CTA Animation === */
+.sticky-cta-enter {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* === FAQ Accordion === */
+details summary {
+  cursor: pointer;
+  list-style: none;
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+details[open] summary .faq-chevron {
+  transform: rotate(180deg);
+}
+.faq-chevron {
+  transition: transform 0.2s ease;
+}
+
+/* === CTA Button Hover Scale === */
+.cta-btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.cta-btn:hover {
+  transform: scale(1.02);
+}
+
+/* === Subtle Card Styles === */
+.card-subtle {
+  border-radius: 6px;
+  border: 1px solid #ECFCCB;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}

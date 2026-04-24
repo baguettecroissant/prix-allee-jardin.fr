@@ -1,0 +1,180 @@
+---
+import { siteConfig } from '../../site.config';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  ogType?: string;
+  noindex?: boolean;
+  jsonLd?: object[];
+}
+
+const {
+  title,
+  description = siteConfig.description,
+  canonical,
+  ogType = 'website',
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+
+const canonicalUrl = canonical
+  ? `https://www.${siteConfig.domain}${canonical}`
+  : Astro.url.href;
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalUrl} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:site_name" content={siteConfig.name} />
+  <meta property="og:locale" content="fr_FR" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Preconnect Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- JSON-LD Structured Data -->
+  {jsonLd.map((schema) => (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  ))}
+</head>
+<body class="min-h-screen flex flex-col" style="background-color: #FEFCF5;">
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-brand-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2 group">
+          <span class="text-2xl">{siteConfig.niche.emoji}</span>
+          <span class="font-bold text-lg text-gray-900 group-hover:text-brand-600 transition-colors" style="font-family: 'Raleway', sans-serif;">
+            {siteConfig.name}
+          </span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+          <a href="/" class="hover:text-brand-600 transition-colors">Accueil</a>
+          <a href="/annuaire" class="hover:text-brand-600 transition-colors">Annuaire</a>
+          <a href="/blog" class="hover:text-brand-600 transition-colors">Blog</a>
+          <a href="/devis" class="hover:text-brand-600 transition-colors">Devis</a>
+        </nav>
+        <a href="/devis" class="bg-accent-500 hover:bg-accent-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm cta-btn">
+          Devis Gratuit →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 pt-16">
+    <slot />
+  </main>
+
+  <!-- Footer — Fond sombre vert forêt -->
+  <footer class="text-gray-300 py-12 mt-16" style="background-color: #4D7C0F;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-2xl">{siteConfig.niche.emoji}</span>
+            <span class="text-white font-bold" style="font-family: 'Raleway', sans-serif;">{siteConfig.name}</span>
+          </div>
+          <p class="text-sm leading-relaxed text-green-100">{siteConfig.tagline}</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Navigation</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/" class="hover:text-white transition-colors">Accueil</a></li>
+            <li><a href="/annuaire" class="hover:text-white transition-colors">Annuaire par ville</a></li>
+            <li><a href="/blog" class="hover:text-white transition-colors">Blog & Guides</a></li>
+            <li><a href="/devis" class="hover:text-white transition-colors">Demander un devis</a></li>
+            <li><a href="/mentions-legales" class="hover:text-white transition-colors">Mentions légales</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Informations</h4>
+          <ul class="space-y-2 text-sm">
+            <li>Service 100% gratuit</li>
+            <li>Artisans paysagistes qualifiés</li>
+            <li>Données indicatives 2026</li>
+          </ul>
+          <div class="mt-4 pt-4 border-t border-green-600">
+            <a href="https://www.comparateur-devis.fr" target="_blank" rel="noopener" class="text-xs hover:text-white transition-colors">
+              comparateur-devis.fr →
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-green-600 pt-6 text-center text-xs text-green-200">
+        <p>© {new Date().getFullYear()} {siteConfig.name} — Tous droits réservés. Les prix sont donnés à titre indicatif.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile CTA -->
+  <div id="sticky-cta" class="fixed bottom-0 left-0 right-0 md:hidden z-40 bg-white border-t border-gray-200 p-3 shadow-xl sticky-cta-enter transition-transform duration-300" style="transform: translateY(100%);">
+    <a href="#devis-form" class="block w-full bg-accent-500 hover:bg-accent-600 text-white text-center py-3.5 rounded-xl font-bold text-base shadow-lg transition-all cta-btn">
+      {siteConfig.niche.emoji} Devis Gratuit — Sans Engagement
+    </a>
+  </div>
+
+  <script is:inline>
+  (function() {
+    var cta = document.getElementById('sticky-cta');
+    if (!cta) return;
+
+    if (window.location.pathname === '/devis' || window.location.pathname === '/devis/') {
+      cta.style.display = 'none';
+      return;
+    }
+
+    var formVisible = false;
+    var scrolledPastHero = false;
+
+    function updateCTA() {
+      if (formVisible || !scrolledPastHero) {
+        cta.style.transform = 'translateY(100%)';
+      } else {
+        cta.style.transform = 'translateY(0)';
+      }
+    }
+
+    window.addEventListener('scroll', function() {
+      scrolledPastHero = window.scrollY > 300;
+      updateCTA();
+    }, { passive: true });
+
+    var formEl = document.getElementById('devis-form');
+    if (formEl && 'IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        formVisible = entries[0].isIntersecting;
+        updateCTA();
+      }, { threshold: 0.3 });
+      observer.observe(formEl);
+    }
+
+    cta.querySelector('a').addEventListener('click', function(e) {
+      if (formEl) {
+        e.preventDefault();
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

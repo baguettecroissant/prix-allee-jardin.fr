@@ -1,0 +1,74 @@
+---
+/**
+ * ViteUnDevis Widget — Code d'intégration officiel
+ * Utilise la méthode d'injection script directe (pas iframe/marque blanche)
+ */
+interface Props {
+  keyword?: string;
+}
+
+import { siteConfig } from '../../site.config';
+
+const { keyword = siteConfig.niche.name } = Astro.props;
+
+const { partnerId, boxId, categoryId } = siteConfig.viteundevis;
+const containerId = `v${boxId}d`;
+---
+
+<div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-dark to-brand-800 px-6 py-5 text-white">
+    <h3 class="text-xl font-bold">
+      Devis {siteConfig.niche.nameShort} Gratuit
+    </h3>
+    <p class="text-brand-200 text-sm mt-1">Sans engagement • Réponse sous 48h</p>
+  </div>
+
+  <!-- Widget Container -->
+  <div class="p-4 sm:p-6">
+    <div id={containerId} class="vud-widget min-h-[400px] w-full"></div>
+
+    <!-- Trust Indicators -->
+    <div class="mt-6 pt-5 border-t border-gray-100">
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="flex flex-col items-center">
+          <span class="text-green-500 text-xl mb-1">🛡️</span>
+          <span class="text-xs text-gray-600 font-medium">100% Gratuit</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-green-500 text-xl mb-1">✅</span>
+          <span class="text-xs text-gray-600 font-medium">Sans engagement</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-green-500 text-xl mb-1">⚡</span>
+          <span class="text-xs text-gray-600 font-medium">Réponse 48h</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ViteUnDevis official integration script -->
+<script is:inline define:vars={{ partnerId, boxId, categoryId, containerId }}>
+  function loadVUDWidget() {
+    var target = document.getElementById(containerId);
+    if (!target || target.dataset.loaded === 'true') return;
+    target.dataset.loaded = 'true';
+
+    // Official ViteUnDevis integration method
+    window.vud_partenaire_id = partnerId;
+    window.vud_categorie_id = categoryId;
+
+    var vud_js = document.createElement('script');
+    vud_js.type = 'text/javascript';
+    vud_js.src = '//www.viteundevis.com/' + boxId + '/' + partnerId + '/' + categoryId + '/';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(vud_js, s);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadVUDWidget);
+  } else {
+    loadVUDWidget();
+  }
+</script>

@@ -1,0 +1,24 @@
+{
+  "name": "prix-allee-jardin.fr",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "fetch-cities": "node scripts/fetch-cities.mjs",
+    "generate-content": "node scripts/generate-local-content.mjs",
+    "prebuild": "node scripts/fetch-cities.mjs && node scripts/generate-local-content.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.2.2",
+    "astro": "^5.18.1",
+    "tailwindcss": "^4.2.2"
+  }
+}

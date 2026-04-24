@@ -1,0 +1,213 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuoteWidget from '../../components/QuoteWidget.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { siteConfig } from '../../../site.config';
+import { getAllDepartments, getCitiesByDepartment } from '../../lib/cities';
+
+export function getStaticPaths() {
+  const departments = getAllDepartments();
+  return departments.map(dept => ({
+    params: { dept: dept.code.toLowerCase() },
+    props: { dept },
+  }));
+}
+
+const { dept } = Astro.props;
+const cities = getCitiesByDepartment(dept.code);
+const allDepartments = getAllDepartments();
+
+const nearbyDepts = allDepartments
+  .filter(d => d.region === dept.region && d.code !== dept.code)
+  .slice(0, 6);
+
+const zone = dept.region.includes('Hauts-de-France') || dept.region.includes('Grand Est') || dept.region.includes('Bourgogne') ? 'H1' :
+             dept.region.includes('PACA') || dept.region.includes('Corse') || dept.region.includes('Occitanie') ? 'H3' : 'H2';
+
+const title = `Allée de Jardin ${dept.name} (${dept.code}) — Prix & Paysagistes 2026`;
+const description = `Comparez les prix d'allée de jardin dans le ${dept.name} (${dept.code}). ${cities.length} villes couvertes. Devis gratuits de paysagistes qualifiés en ${dept.region}.`;
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `Allée de Jardin - ${dept.name}`,
+    "description": description,
+    "url": `https://www.${siteConfig.domain}/departement/${dept.code.toLowerCase()}`,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `https://www.${siteConfig.domain}` },
+      { "@type": "ListItem", "position": 2, "name": "Annuaire", "item": `https://www.${siteConfig.domain}/annuaire` },
+      { "@type": "ListItem", "position": 3, "name": dept.name },
+    ]
+  }
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={`/departement/${dept.code.toLowerCase()}`}
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="gradient-hero text-white py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Breadcrumbs items={[
+        { label: "Annuaire", href: "/annuaire" },
+        { label: dept.name, href: `/departement/${dept.code.toLowerCase()}` },
+      ]} />
+
+      <div class="grid lg:grid-cols-5 gap-10 items-start mt-6">
+        <div class="lg:col-span-3">
+          <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm mb-4">
+            <span>📍</span>
+            <span>{dept.region}</span>
+          </div>
+
+          <h1 class="text-2xl md:text-4xl font-extrabold leading-tight mb-4">
+            Allée de Jardin dans le {dept.name} ({dept.code})
+          </h1>
+
+          <p class="text-green-100 leading-relaxed mb-6 max-w-xl">
+            Trouvez un paysagiste qualifié pour votre allée de jardin dans le {dept.name}.
+            <strong class="text-white">{cities.length} villes couvertes</strong>, devis gratuits et sans engagement.
+          </p>
+
+          <div class="flex flex-wrap gap-3 mb-6">
+            <span class="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-full text-sm">
+              ✓ {cities.length} villes
+            </span>
+            <span class="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-full text-sm">
+              ✓ Zone climatique {zone}
+            </span>
+            <span class="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-full text-sm">
+              ✓ Paysagistes locaux
+            </span>
+          </div>
+
+          <a href="/devis" class="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-lg text-base cta-btn">
+            🌳 Devis Gratuit dans le {dept.name}
+          </a>
+        </div>
+
+        <div class="lg:col-span-2" id="devis-form">
+          <div class="sticky top-20">
+            <QuoteWidget keyword={`Allée de Jardin ${dept.name}`} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+    <!-- Local Info -->
+    <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        🌳 Créer une allée de jardin dans le {dept.name}
+      </h2>
+      <div class="prose max-w-none text-gray-600 space-y-4">
+        <p>
+          Le département du <strong>{dept.name}</strong> ({dept.code}), situé en région <strong>{dept.region}</strong>,
+          se caractérise par un climat de <strong>zone {zone}</strong>.
+          {zone === 'H1' ? " Les hivers rigoureux nécessitent des matériaux résistants au gel (granit, béton haute résistance) et une fondation renforcée de 25-30 cm. Le drainage est essentiel pour éviter les cycles gel-dégel destructeurs." :
+           zone === 'H3' ? " Le climat méditerranéen doux et sec favorise la pierre naturelle locale et les graviers clairs. Les sols argileux, fréquents dans la région, nécessitent un géotextile renforcé et un drainage adapté." :
+           " Le climat tempéré permet d'utiliser tous les types de matériaux. Les pavés autobloquants et le béton désactivé dominent le marché local grâce à leur excellent rapport durabilité/esthétique."}
+        </p>
+        <p>
+          Nos <strong>{cities.length} villes couvertes</strong> dans le {dept.name} vous garantissent l'accès à des
+          paysagistes qualifiés proches de chez vous. La proximité réduit les frais de déplacement
+          et facilite le suivi de chantier.
+        </p>
+      </div>
+    </section>
+
+    <!-- Price Range -->
+    <section class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 p-6 md:p-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">
+        💰 Prix moyen d'une allée de jardin dans le {dept.name}
+      </h2>
+      <div class="grid sm:grid-cols-3 gap-4 mb-4">
+        <div class="bg-white rounded-xl p-4 text-center border border-green-100">
+          <span class="block text-sm text-gray-500 mb-1">Gravier stabilisé</span>
+          <span class="block text-xl font-bold text-gray-900">{zone === 'H1' ? '35 – 65€' : zone === 'H3' ? '30 – 55€' : '30 – 60€'}/m²</span>
+          <span class="block text-xs text-gray-400">Pose comprise</span>
+        </div>
+        <div class="bg-white rounded-xl p-4 text-center border border-brand-200 ring-2 ring-brand-100">
+          <span class="block text-sm text-brand-600 font-medium mb-1">Le plus populaire</span>
+          <span class="block text-xl font-bold text-gray-900">{zone === 'H1' ? '55 – 95€' : zone === 'H3' ? '45 – 85€' : '50 – 90€'}/m²</span>
+          <span class="block text-xs text-gray-400">Pavés autobloquants</span>
+        </div>
+        <div class="bg-white rounded-xl p-4 text-center border border-green-100">
+          <span class="block text-sm text-gray-500 mb-1">Pierre naturelle</span>
+          <span class="block text-xl font-bold text-gray-900">{zone === 'H1' ? '90 – 160€' : zone === 'H3' ? '75 – 145€' : '80 – 150€'}/m²</span>
+          <span class="block text-xs text-gray-400">Granit, ardoise, grès</span>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500">
+        Prix TTC pose et terrassement compris. Pour une allée standard de 20 m² dans le {dept.name}, le budget total se situe entre
+        <strong>{zone === 'H1' ? '700€ et 3 200€' : zone === 'H3' ? '600€ et 2 900€' : '600€ et 3 000€'}</strong>.
+      </p>
+    </section>
+
+    <!-- Cities Grid -->
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        📍 Toutes les villes du {dept.name} ({dept.code})
+      </h2>
+      <p class="text-gray-500 text-sm mb-6">
+        Cliquez sur une ville pour voir les prix et obtenir vos devis gratuits
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {cities.map((city) => (
+          <a
+            href={`/${city.slug}`}
+            class="bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-brand-300 hover:shadow-md transition-all group text-center"
+          >
+            <span class="font-semibold text-gray-900 group-hover:text-brand-600 text-sm block">{city.name}</span>
+            <span class="text-xs text-gray-400">{city.zip}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Nearby Departments -->
+    {nearbyDepts.length > 0 && (
+      <section>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">
+          🗺️ Départements voisins en {dept.region}
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {nearbyDepts.map((nd) => (
+            <a
+              href={`/departement/${nd.code.toLowerCase()}`}
+              class="bg-white border border-gray-200 rounded-xl px-5 py-4 hover:border-brand-300 hover:shadow-md transition-all group"
+            >
+              <span class="font-semibold text-gray-900 group-hover:text-brand-600 text-sm block">{nd.name} ({nd.code})</span>
+              <span class="text-xs text-gray-400">{nd.count} {nd.count > 1 ? 'villes' : 'ville'} • {nd.region}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- CTA -->
+    <section class="pb-20 md:pb-0">
+      <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-8 text-center text-white">
+        <h2 class="text-xl md:text-2xl font-bold mb-3">
+          Obtenez vos 3 devis Allée de Jardin dans le {dept.name}
+        </h2>
+        <p class="text-brand-100 mb-5 text-sm">
+          Gratuit • Sans engagement • Paysagistes du {dept.name}
+        </p>
+        <a href="/devis" class="inline-block bg-white text-brand-700 font-bold px-8 py-3.5 rounded-xl hover:bg-brand-50 transition-colors shadow-lg cta-btn">
+          Demander mes devis →
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

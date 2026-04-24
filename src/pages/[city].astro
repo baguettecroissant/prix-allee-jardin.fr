@@ -1,0 +1,389 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import QuoteWidget from '../components/QuoteWidget.astro';
+import PriceTable from '../components/PriceTable.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import FAQ from '../components/FAQ.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { siteConfig } from '../../site.config';
+import { getAllCities, getCityBySlug, getNearbyCities } from '../lib/cities';
+import localContentRaw from '../data/local-content.json';
+
+const localContent = localContentRaw as Record<string, {
+  intro: string;
+  local_tip: string;
+  history_anecdote: string;
+  faq_local: { question: string; answer: string };
+  market_data: string;
+}>;
+
+export function getStaticPaths() {
+  const allCities = getAllCities();
+  return allCities.map(city => ({
+    params: { city: city.slug },
+    props: { city },
+  }));
+}
+
+const { city } = Astro.props;
+const nearbyCities = getNearbyCities(city, 8);
+const lc = localContent[city.slug];
+
+// SEO
+const title = siteConfig.niche.seoTitleTemplate
+  .replace('{city}', city.name)
+  .replace('{zip}', city.zip);
+const description = siteConfig.niche.metaDescTemplate
+  .replace('{city}', city.name)
+  .replace('{zip}', city.zip);
+
+// Deterministic seed for content variations
+const seed = city.slug.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
+// Schema.org
+const faqItems = [
+  ...siteConfig.faq.slice(0, 4),
+  ...(lc ? [{ q: lc.faq_local.question, a: lc.faq_local.answer }] : []),
+];
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": `${siteConfig.niche.name} à ${city.name}`,
+    "description": description,
+    "areaServed": {
+      "@type": "City",
+      "name": city.name,
+      "postalCode": city.zip,
+    },
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": siteConfig.name,
+      "url": `https://www.${siteConfig.domain}/${city.slug}`,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `https://www.${siteConfig.domain}` },
+      { "@type": "ListItem", "position": 2, "name": "Annuaire", "item": `https://www.${siteConfig.domain}/annuaire` },
+      { "@type": "ListItem", "position": 3, "name": city.name, "item": `https://www.${siteConfig.domain}/${city.slug}` },
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(f => ({
+      "@type": "Question",
+      "name": f.q.replace('{city}', city.name),
+      "acceptedAnswer": { "@type": "Answer", "text": f.a.replace('{city}', city.name) }
+    }))
+  }
+];
+
+// Generic intro fallbacks
+const genericIntros = [
+  `Vous prévoyez des travaux d'**allée de jardin** à **${city.name}** (${city.zip}) ? Comparez gratuitement jusqu'à 3 devis de paysagistes qualifiés dans le département ${city.deptName} (${city.deptCode}). Notre service est 100% gratuit et sans engagement.`,
+  `La création d'une **allée de jardin** à **${city.name}** valorise votre propriété et facilite les accès au quotidien. En ${city.region}, les professionnels du ${city.deptName} proposent des solutions adaptées à votre terrain et à votre budget.`,
+  `À **${city.name}** (${city.deptName}), de plus en plus de propriétaires investissent dans une **allée de jardin** esthétique et fonctionnelle. Graviers, pavés, béton ou pierre naturelle : estimez votre projet gratuitement avec nos 3 devis.`,
+];
+
+const introText = lc?.intro || genericIntros[seed % genericIntros.length];
+
+// Benefits
+const benefits = [
+  `Paysagistes **qualifiés** dans le ${city.deptName} (${city.deptCode})`,
+  `Allée adaptée au **climat** et au **sol** de ${city.region}`,
+  `Matériaux **résistants** aux conditions locales`,
+  `Valorisation de votre **propriété** à ${city.name}`,
+  `Conformité avec le **PLU** de votre commune`,
+  `Drainage et **perméabilité** optimisés`,
+];
+
+const shuffledBenefits = [...benefits].sort((a, b) => {
+  const ha = a.charCodeAt(seed % a.length);
+  const hb = b.charCodeAt(seed % b.length);
+  return ha - hb;
+});
+
+// Zone climatique
+const zone = city.region.includes('Hauts-de-France') || city.region.includes('Grand Est') ? 'H1' :
+             city.region.includes('PACA') || city.region.includes('Corse') ? 'H3' :
+             city.region.includes('Île-de-France') || city.region.includes('Bourgogne') ? 'H1' : 'H2';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={`/${city.slug}`}
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="gradient-hero text-white py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Breadcrumbs items={[
+        { label: "Annuaire", href: "/annuaire" },
+        { label: city.deptName, href: `/departement/${city.deptCode.toLowerCase()}` },
+        { label: city.name, href: `/${city.slug}` },
+      ]} />
+
+      <div class="grid lg:grid-cols-5 gap-10 items-start mt-6">
+        <div class="lg:col-span-3">
+          <h1 class="text-2xl md:text-4xl font-extrabold leading-tight mb-6">
+            Allée de Jardin à {city.name} ({city.zip})<br/>
+            <span class="text-brand-200 text-xl md:text-2xl font-bold">Prix & Devis Gratuit 2026</span>
+          </h1>
+
+          <div class="mb-8">
+            <p class="text-green-100 leading-relaxed" set:html={introText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')} />
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-3 mb-8">
+            {shuffledBenefits.map((b) => (
+              <div class="flex items-start gap-2 bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                <span class="text-green-400 mt-0.5">✓</span>
+                <span class="text-sm text-green-100" set:html={b.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')} />
+              </div>
+            ))}
+          </div>
+
+          <a href="/devis" class="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-lg text-base cta-btn">
+            🌳 Comparer 3 Devis à {city.name}
+          </a>
+        </div>
+
+        <div class="lg:col-span-2" id="devis-form">
+          <div class="sticky top-20">
+            <QuoteWidget keyword={`${siteConfig.niche.name} ${city.name}`} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+    {/* Section: Local Expert Content */}
+    {lc && (
+      <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+          🌳 Créer une allée de jardin à {city.name} ({city.deptCode})
+        </h2>
+        <div class="prose max-w-none text-gray-600 space-y-4">
+          <p>{lc.intro}</p>
+
+          <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg my-6">
+            <h3 class="text-green-900 font-bold text-base mb-2">💡 Conseil local — {city.name}</h3>
+            <p class="text-green-800 text-sm">{lc.local_tip}</p>
+          </div>
+
+          <p class="italic text-gray-500 border-l-2 border-gray-200 pl-4">
+            📜 {lc.history_anecdote}
+          </p>
+        </div>
+      </section>
+    )}
+
+    {/* Section: Market Data */}
+    {lc?.market_data && (
+      <section class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 p-6 md:p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-3">
+          📊 Baromètre des prix — {city.deptName} ({city.deptCode})
+        </h2>
+        <p class="text-gray-700 leading-relaxed">{lc.market_data}</p>
+      </section>
+    )}
+
+    {/* Section: Generic Local Content */}
+    {!lc && (
+      <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          🌳 Créer une allée de jardin à {city.name}
+        </h2>
+        <div class="prose max-w-none text-gray-600 space-y-4">
+          <p>
+            La ville de <strong>{city.name}</strong>, située dans le département <strong>{city.deptName}</strong>
+            en région <strong>{city.region}</strong>, dispose d'artisans paysagistes qualifiés
+            pour la création d'allées de jardin sur-mesure.
+          </p>
+          <p>
+            Que vous habitiez en centre-ville de {city.name} ou dans les communes environnantes,
+            nos paysagistes partenaires interviennent dans tout le département {city.deptCode}.
+            Ils réalisent une étude de terrain gratuite avant tout devis pour vous proposer
+            les matériaux et la technique de pose adaptés à votre sol.
+          </p>
+          <p>
+            En {city.region},
+            {zone === 'H1' ? " les hivers rigoureux et le gel fréquent nécessitent une fondation renforcée (20-30 cm de grave compactée) et des matériaux résistants au gel comme le granit ou le béton haute résistance. Le drainage est essentiel pour éviter les problèmes de gel-dégel." :
+             zone === 'H3' ? " le climat méditerranéen sec et chaud favorise les allées en pierre naturelle locale ou en gravier clair qui reflète la lumière. Les sols argileux fréquents dans cette zone nécessitent un géotextile renforcé et un bon drainage." :
+             " le climat tempéré offre un excellent compromis : tous les matériaux d'allée conviennent. Les pavés autobloquants et le béton désactivé sont les choix les plus populaires pour leur durabilité et leur esthétique."}
+          </p>
+          <p>
+            Le prix moyen d'une allée de jardin dans le {city.deptName} se situe entre
+            <strong>{zone === 'H1' ? '40€ et 130€/m²' : zone === 'H3' ? '35€ et 140€/m²' : '35€ et 120€/m²'}</strong> TTC pose comprise,
+            selon le matériau choisi et la complexité du terrain.
+          </p>
+        </div>
+      </section>
+    )}
+
+    {/* Section: Price Table */}
+    <section>
+      <p class="text-sm text-gray-500 mb-4">
+        💡 Les prix ci-dessous sont des moyennes nationales. À {city.name} ({city.region}),
+        les tarifs peuvent varier de ±{zone === 'H1' ? '15' : zone === 'H3' ? '10' : '10'}% selon
+        l'accessibilité du terrain, la nature du sol et les matériaux choisis.
+      </p>
+      <PriceTable />
+    </section>
+
+    {/* Section: Detailed Guide */}
+    <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">
+        ⚙️ Guide : choisir le matériau de son allée à {city.name}
+      </h2>
+      <div class="prose max-w-none text-gray-600 space-y-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Quel matériau pour votre allée ?</h3>
+          <p>
+            Le choix du matériau dépend de l'usage, du budget et du style de votre extérieur à {city.name}.
+            Voici les options les plus courantes dans le {city.deptName} :
+          </p>
+          <ul class="space-y-2 mt-3">
+            <li class="flex items-start gap-2">
+              <span class="text-brand-600 font-bold">→</span>
+              <span><strong>Gravier stabilisé</strong> (30-60€/m²) : économique, drainant, pose rapide. Idéal pour les allées piétonnes et les chemins de jardin.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-brand-600 font-bold">→</span>
+              <span><strong>Pavés autobloquants</strong> (50-90€/m²) : résistant, carrossable, large choix de coloris. Le choix n°1 pour les accès voiture.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-brand-600 font-bold">→</span>
+              <span><strong>Béton désactivé</strong> (60-100€/m²) : monolithique, antidérapant, très durable. Idéal pour les grandes surfaces.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-brand-600 font-bold">→</span>
+              <span><strong>Pierre naturelle</strong> (80-150€/m²) : granit, ardoise ou grès. Le choix premium pour une esthétique intemporelle.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Comparatif des matériaux à {city.name}</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                  <th class="px-4 py-3 text-left font-semibold">Matériau</th>
+                  <th class="px-4 py-3 text-left font-semibold">Prix/m²</th>
+                  <th class="px-4 py-3 text-left font-semibold">Durabilité</th>
+                  <th class="px-4 py-3 text-left font-semibold">Carrossable</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr>
+                  <td class="px-4 py-3">Gravier stabilisé</td>
+                  <td class="px-4 py-3 font-bold text-brand-600">30 – 60€</td>
+                  <td class="px-4 py-3">⭐⭐⭐</td>
+                  <td class="px-4 py-3">⚠️ Limité</td>
+                </tr>
+                <tr class="bg-green-50 font-semibold">
+                  <td class="px-4 py-3 text-green-800">✅ Pavés autobloquants</td>
+                  <td class="px-4 py-3 text-green-700">50 – 90€</td>
+                  <td class="px-4 py-3 text-green-700">⭐⭐⭐⭐⭐</td>
+                  <td class="px-4 py-3 text-green-700">✅ Oui</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3">Béton désactivé</td>
+                  <td class="px-4 py-3 font-bold text-brand-600">60 – 100€</td>
+                  <td class="px-4 py-3">⭐⭐⭐⭐⭐</td>
+                  <td class="px-4 py-3">✅ Oui</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3">Pierre naturelle</td>
+                  <td class="px-4 py-3 font-bold text-brand-600">80 – 150€</td>
+                  <td class="px-4 py-3">⭐⭐⭐⭐⭐</td>
+                  <td class="px-4 py-3">✅ Oui</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3">Résine drainante</td>
+                  <td class="px-4 py-3 font-bold text-brand-600">50 – 90€</td>
+                  <td class="px-4 py-3">⭐⭐⭐⭐</td>
+                  <td class="px-4 py-3">⚠️ Piéton</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3">Béton imprimé</td>
+                  <td class="px-4 py-3 font-bold text-brand-600">70 – 120€</td>
+                  <td class="px-4 py-3">⭐⭐⭐⭐</td>
+                  <td class="px-4 py-3">✅ Oui</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Déroulement des travaux à {city.name}</h3>
+          <ol class="space-y-3 mt-3 list-decimal list-inside">
+            <li><strong>Étude du terrain gratuite</strong> — Le paysagiste évalue la nature du sol, la pente, le drainage et les contraintes d'accès. Durée : 1h.</li>
+            <li><strong>Devis détaillé</strong> — Vous recevez un devis précisant les matériaux, la surface, les bordures, le terrassement et le prix total. Comparez nos 3 devis.</li>
+            <li><strong>Terrassement et fondation</strong> — Décapage de la terre végétale, pose du géotextile, mise en place de la grave compactée (15-30 cm selon usage).</li>
+            <li><strong>Pose du revêtement</strong> — Selon le matériau : lit de sable + pavés, coffrage + coulage béton, ou épandage de gravier stabilisé.</li>
+            <li><strong>Finitions et joints</strong> — Pose des bordures, jointoiement, nettoyage final et vérification du drainage.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    {/* Section: Process Steps */}
+    <ProcessSteps />
+
+    {/* Section: FAQ */}
+    {lc ? (
+      <FAQ items={[
+        ...siteConfig.faq,
+        { q: lc.faq_local.question, a: lc.faq_local.answer }
+      ]} cityName={city.name} />
+    ) : (
+      <FAQ items={siteConfig.faq} cityName={city.name} />
+    )}
+
+    {/* Section: Nearby Cities */}
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        📍 Allée de Jardin près de {city.name}
+      </h2>
+      <p class="text-gray-500 text-sm mb-6">Nos paysagistes interviennent aussi dans ces villes du {city.deptName}</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {nearbyCities.map((nc) => (
+          <a
+            href={`/${nc.slug}`}
+            class="bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-brand-300 hover:shadow-md transition-all group text-center"
+          >
+            <span class="font-semibold text-gray-900 group-hover:text-brand-600 text-sm block">{nc.name}</span>
+            <span class="text-xs text-gray-400">{nc.zip} • {nc.deptName}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {/* Section: Final CTA */}
+    <section class="pb-20 md:pb-0">
+      <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-8 text-center text-white">
+        <h2 class="text-xl md:text-2xl font-bold mb-3">
+          Obtenez vos 3 devis Allée de Jardin à {city.name}
+        </h2>
+        <p class="text-brand-100 mb-5 text-sm">
+          Gratuit • Sans engagement • Paysagistes du {city.deptName}
+        </p>
+        <a href="/devis" class="inline-block bg-white text-brand-700 font-bold px-8 py-3.5 rounded-xl hover:bg-brand-50 transition-colors shadow-lg cta-btn">
+          Demander mes devis →
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

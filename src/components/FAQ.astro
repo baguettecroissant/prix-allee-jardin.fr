@@ -1,0 +1,40 @@
+---
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
+interface Props {
+  items: FaqItem[];
+  cityName?: string;
+}
+
+const { items, cityName } = Astro.props;
+
+// Replace {city} placeholders
+const processedItems = items.map(item => ({
+  q: item.q.replace('{city}', cityName || ''),
+  a: item.a.replace('{city}', cityName || ''),
+}));
+---
+
+<section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">
+    ❓ Questions Fréquentes{cityName ? ` — ${cityName}` : ''}
+  </h2>
+  <div class="space-y-3">
+    {processedItems.map((item) => (
+      <details class="group border border-gray-200 rounded-xl overflow-hidden hover:border-brand-300 transition-colors">
+        <summary class="flex items-center justify-between p-5 cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+          <span class="font-semibold text-gray-900 text-sm md:text-base pr-4">{item.q}</span>
+          <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        <div class="px-5 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-4">
+          {item.a}
+        </div>
+      </details>
+    ))}
+  </div>
+</section>

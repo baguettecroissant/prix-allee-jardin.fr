@@ -1,0 +1,61 @@
+---
+import { siteConfig } from '../../site.config';
+---
+
+<section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+  <h2 class="text-2xl font-bold text-gray-900 mb-2">
+    💰 Prix {siteConfig.niche.nameShort} en 2026
+  </h2>
+  <p class="text-sm text-gray-500 mb-6">{siteConfig.pricingNote}</p>
+
+  <!-- Mobile Cards -->
+  <div class="md:hidden space-y-3">
+    {siteConfig.pricing.map((row) => (
+      <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+        <h3 class="font-bold text-gray-900 text-sm mb-1">{row.service}</h3>
+        <p class="text-brand-600 font-bold text-lg">{row.price}</p>
+        <p class="text-xs text-gray-500 mt-1">{row.details}</p>
+      </div>
+    ))}
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-gray-50 text-sm text-gray-500 border-b border-gray-200">
+          <th class="px-4 py-3 text-left font-semibold rounded-tl-lg">Prestation</th>
+          <th class="px-4 py-3 text-left font-semibold">Prix TTC Posé</th>
+          <th class="px-4 py-3 text-left font-semibold rounded-tr-lg">Détails</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 text-sm">
+        {siteConfig.pricing.map((row) => (
+          <tr class="hover:bg-gray-50/50 transition-colors">
+            <td class="px-4 py-4 font-medium text-gray-900">{row.service}</td>
+            <td class="px-4 py-4 font-bold text-brand-600 whitespace-nowrap">{row.price}</td>
+            <td class="px-4 py-4 text-gray-600">{row.details}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Aides Section -->
+{siteConfig.aids && (
+  <section class="bg-green-50 rounded-2xl border border-green-200 p-6 md:p-8 mt-6">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+      🏛️ Aides financières 2026
+    </h2>
+    <div class="grid sm:grid-cols-2 gap-4">
+      {siteConfig.aids.map((aid) => (
+        <div class="bg-white rounded-xl p-4 border border-green-100 shadow-sm">
+          <h3 class="font-bold text-gray-900">{aid.name}</h3>
+          <p class="text-green-700 font-bold text-lg mt-1">{aid.amount}</p>
+          <p class="text-xs text-gray-500 mt-1">{aid.condition}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+)}

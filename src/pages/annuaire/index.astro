@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../../site.config';
+import { getAllCities, getAllDepartments, getCitiesByDepartment } from '../../lib/cities';
+
+const departments = getAllDepartments();
+---
+
+<BaseLayout
+  title={`Annuaire Allée de Jardin par Ville — Tous les Départements | ${siteConfig.name}`}
+  description={`Trouvez un paysagiste pour votre allée de jardin dans votre ville. Annuaire complet par département avec devis gratuits.`}
+  canonical="/annuaire"
+>
+  <section class="gradient-hero text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-4">
+        📍 Annuaire Allée de Jardin par Ville
+      </h1>
+      <p class="text-green-100 text-lg">
+        Trouvez un paysagiste qualifié dans votre département
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {departments.map((dept) => {
+      const deptCities = getCitiesByDepartment(dept.code);
+      return (
+        <div id={`dept-${dept.code}`} class="mb-10">
+          <h2 class="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <span class="bg-brand-100 text-brand-700 px-2 py-0.5 rounded text-sm font-mono">{dept.code}</span>
+            <a href={`/departement/${dept.code.toLowerCase()}`} class="hover:text-brand-600 transition-colors">
+              {dept.name}
+            </a>
+            <span class="text-gray-400 text-sm font-normal">({dept.region})</span>
+          </h2>
+          <div class="flex flex-wrap gap-2 mt-3">
+            {deptCities.map((city) => (
+              <a
+                href={`/${city.slug}`}
+                class="bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-brand-300 hover:shadow-sm transition-all text-sm font-medium text-gray-700 hover:text-brand-600"
+              >
+                {city.name} ({city.zip})
+              </a>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </section>
+</BaseLayout>
