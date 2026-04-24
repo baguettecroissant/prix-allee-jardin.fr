@@ -43,9 +43,9 @@ export const siteConfig = {
 
   // === MONÉTISATION ===
   viteundevis: {
-    partnerId: "2353",
-    boxId: "822b6a43e4",
-    categoryId: "130",
+    partnerId: '2353',
+    boxId: '2b19bb9920', // ViteUnDevis Box ID
+    categoryId: '138', // Category ID for allée de jardin
   },
 
   // === COULEURS ===
